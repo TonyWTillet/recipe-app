@@ -1,45 +1,123 @@
-# recipe-app
+# Recipe App 🍳
 
-This template should help get you started developing with Vue 3 in Vite.
+A modern recipe application built with Vue 3, TypeScript, and Firebase. This application allows users to discover, save, and manage their favorite recipes with a beautiful and intuitive interface.
 
-## Recommended IDE Setup
+![Recipe App Screenshot](screenshot.png)
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## ✨ Features
 
-## Type Support for `.vue` Imports in TS
+- 🔐 User authentication (signup, login, password reset)
+- 👤 User profile management
+- 📱 Responsive design
+- 🎨 Modern UI with Vue 3
+- 🔥 Real-time data with Firebase
+- 💬 AI-powered recipe chatbot
+- 🌙 Dark/Light mode support
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+## 🚀 Getting Started
 
-## Customize configuration
+### Prerequisites
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+- Node.js (v16 or higher)
+- npm or yarn
+- A Firebase account
 
-## Project Setup
+### Installation
 
-```sh
-npm install
+1. **Clone the repository**
+
+   ```bash
+   git clone https://github.com/yourusername/recipe-app.git
+   cd recipe-app
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
+
+3. **Set up Firebase**
+
+   - Create a new Firebase project at [Firebase Console](https://console.firebase.google.com/)
+   - Enable Authentication (Email/Password)
+   - Create a new web app in your Firebase project
+   - Copy your Firebase configuration
+
+4. **Configure environment variables**
+
+   - Create a `.env` file in the root directory
+   - Add your Firebase configuration:
+
+   ```env
+   VITE_FIREBASE_API_KEY=your-api-key
+   VITE_FIREBASE_AUTH_DOMAIN=your-auth-domain
+   VITE_FIREBASE_PROJECT_ID=your-project-id
+   VITE_FIREBASE_STORAGE_BUCKET=your-storage-bucket
+   VITE_FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id
+   VITE_FIREBASE_APP_ID=your-app-id
+   ```
+
+5. **Start the development server**
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
+
+## 🛠️ Built With
+
+- [Vue 3](https://vuejs.org/) - The Progressive JavaScript Framework
+- [TypeScript](https://www.typescriptlang.org/) - JavaScript with syntax for types
+- [Firebase](https://firebase.google.com/) - Backend as a Service
+- [Vite](https://vitejs.dev/) - Next Generation Frontend Tooling
+- [Vue Router](https://router.vuejs.org/) - The official router for Vue.js
+- [Pinia](https://pinia.vuejs.org/) - The Vue Store that you will enjoy using
+
+## 📁 Project Structure
+
+```
+recipe-app/
+├── src/
+│   ├── assets/          # Static assets
+│   ├── components/      # Vue components
+│   ├── composables/     # Vue composables
+│   ├── firebase/        # Firebase configuration
+│   ├── router/          # Vue Router configuration
+│   ├── stores/          # Pinia stores
+│   └── views/           # Page components
+├── public/              # Public static files
+└── ...config files
 ```
 
-### Compile and Hot-Reload for Development
+## 🔧 Available Scripts
 
-```sh
-npm run dev
-```
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run test` - Run tests
+- `npm run lint` - Lint code
 
-### Type-Check, Compile and Minify for Production
+## 🤝 Contributing
 
-```sh
-npm run build
-```
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-### Run Unit Tests with [Vitest](https://vitest.dev/)
+## 📝 License
 
-```sh
-npm run test:unit
-```
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-### Lint with [ESLint](https://eslint.org/)
+## 👥 Authors
 
-```sh
-npm run lint
-```
+- **Your Name** - _Initial work_ - [YourGitHub](https://github.com/yourusername)
+
+## 🙏 Acknowledgments
+
+- Vue.js team for the amazing framework
+- Firebase team for the powerful backend services
+- All contributors who help improve this project
