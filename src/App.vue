@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterView } from 'vue-router'
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useAuth } from './composables/useAuth'
 import { auth } from './firebase/config'
 import { onAuthStateChanged } from 'firebase/auth'
 import type { User } from 'firebase/auth'
+import HomeHeader from './components/HomeHeader.vue'
 
 const { logout } = useAuth()
 const user = ref<User | null>(null)
-const isMenuOpen = ref(false)
 
 // Gérer l'état de connexion de l'utilisateur
 onMounted(() => {
@@ -21,188 +21,95 @@ onMounted(() => {
     unsubscribe()
   })
 })
-
-// Fermer le menu si on clique en dehors
-const handleClickOutside = (event: MouseEvent) => {
-  const target = event.target as HTMLElement
-  if (!target.closest('.user-menu')) {
-    isMenuOpen.value = false
-  }
-}
-
-onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
-})
-
-const toggleMenu = () => {
-  isMenuOpen.value = !isMenuOpen.value
-}
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <nav>
-        <RouterLink to="/">Accueil</RouterLink>
-        <div class="auth-links">
-          <template v-if="user">
-            <div class="user-menu">
-              <button @click="toggleMenu" class="user-menu-button">
-                {{ user.displayName || user.email }}
-                <span class="arrow-down">▼</span>
-              </button>
-              <div v-if="isMenuOpen" class="user-menu-dropdown">
-                <RouterLink to="/account" class="menu-item">Mon compte</RouterLink>
-                <button @click="logout" class="menu-item logout-button">Déconnexion</button>
-              </div>
-            </div>
-          </template>
-          <template v-else>
-            <RouterLink to="/login">Connexion</RouterLink>
-          </template>
-        </div>
-      </nav>
+  <div class="min-h-screen w-full fixed inset-0 bg-[#0a0a0a]">
+    <!-- Fond avec effet de dégradé -->
+    <div class="fixed inset-0 w-full h-full">
+      <!-- Dégradé violet en haut à droite -->
+      <div class="absolute inset-0 w-full h-full bg-[radial-gradient(ellipse_at_top_right,rgba(124,58,237,0.3),rgba(10,10,10,0)_80%)]"></div>
+      <!-- Dégradé vert-bleu au centre -->
+      <div class="absolute inset-0 w-full h-full bg-[radial-gradient(circle_at_60%_50%,rgba(16,185,129,0.25),rgba(10,10,10,0)_80%)]"></div>
+      <!-- Dégradé bleu en bas à gauche -->
+      <div class="absolute inset-0 w-full h-full bg-[radial-gradient(ellipse_at_bottom_left,rgba(59,130,246,0.3),rgba(10,10,10,0)_80%)]"></div>
     </div>
-  </header>
 
-  <RouterView />
+    <!-- Contenu principal -->
+    <div class="relative z-20 min-h-screen flex flex-col">
+      <HomeHeader :user="user" @logout="logout" class="bg-transparent" />
+
+      <main class="flex-1 container mx-auto px-4 py-8">
+        <RouterView v-slot="{ Component }">
+          <transition
+            name="page"
+            mode="out-in"
+          >
+            <component :is="Component" />
+          </transition>
+        </RouterView>
+      </main>
+
+      <footer class="border-t border-white/10 py-6">
+        <div class=" mx-auto px-4 flex justify-center items-center w-full">
+          <p class="text-gray-400">&copy; {{ new Date().getFullYear() }} Recipe Chatbot. Tous droits réservés.</p>
+        </div>
+      </footer>
+    </div>
+  </div>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
-  background-color: #f8f9fa;
-  padding: 1rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+<style>
+/* Styles globaux */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: #0a0a0a;
+  color: white;
+  overflow-x: hidden;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-nav {
+#app {
+  min-height: 100%;
   width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-.auth-links {
-  display: flex;
-  align-items: center;
-}
-
-.user-menu {
   position: relative;
+  background: #0a0a0a;
 }
 
-.user-menu-button {
-  background: none;
-  border: none;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1rem;
-  color: #333;
+/* Animations de transition de page */
+.page-enter-active,
+.page-leave-active {
+  transition: all 0.3s ease-in-out;
 }
 
-.arrow-down {
-  font-size: 0.8rem;
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(20px);
 }
 
-.user-menu-dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background-color: white;
-  border: 1px solid #ddd;
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+/* Style de défilement personnalisé */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  min-width: 200px;
-  z-index: 1000;
 }
 
-.menu-item {
-  display: block;
-  padding: 0.75rem 1rem;
-  text-decoration: none;
-  color: #333;
-  border: none;
-  background: none;
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
 }
 
-.menu-item:hover {
-  background-color: #f8f9fa;
-}
-
-.logout-button {
-  color: #dc3545;
-}
-
-.logout-button:hover {
-  background-color: #fff5f5;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 </style>

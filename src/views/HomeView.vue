@@ -1,19 +1,36 @@
 <template>
-  <div class="home">
-    <HomeHeader />
-    <div v-if="loading" class="loading">Chargement...</div>
+  <div class="home relative">
+    <!-- Loading state -->
+    <div v-if="loading" class="flex items-center justify-center min-h-[60vh]">
+      <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+    </div>
+
     <template v-else>
-      <div v-if="user" class="authenticated-content">
-        <UserInfo :user="user" @logout="logout" />
-        <RecipeChatbot />
+      <!-- Contenu authentifié -->
+      <div v-if="user" class="space-y-8">
+
+        <div class="bg-white/5 rounded-2xl p-8 border border-white/10">
+          <RecipeChatbot />
+        </div>
       </div>
+
+      <!-- Formulaires d'authentification -->
       <template v-else>
-        <AuthForm
-          v-if="!showResetPassword"
-          @auth-success="handleAuthSuccess"
-          @reset-password="showResetPassword = true"
-        />
-        <ResetPassword v-else @back="showResetPassword = false" />
+        <div class="max-w-md mx-auto">
+          <div class="bg-white/5 rounded-2xl p-8 border border-white/10">
+            <AuthForm
+              v-if="!showResetPassword"
+              @auth-success="handleAuthSuccess"
+              @reset-password="showResetPassword = true"
+              class="space-y-6"
+            />
+            <ResetPassword
+              v-else
+              @back="showResetPassword = false"
+              class="space-y-6"
+            />
+          </div>
+        </div>
       </template>
     </template>
   </div>
@@ -21,10 +38,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import HomeHeader from '../components/HomeHeader.vue'
 import RecipeChatbot from '../components/RecipeChatbot.vue'
 import AuthForm from '../components/AuthForm.vue'
-import UserInfo from '../components/UserInfo.vue'
 import ResetPassword from '../components/ResetPassword.vue'
 import { useAuth } from '../composables/useAuth'
 import type { User } from 'firebase/auth'
@@ -39,18 +54,14 @@ const handleAuthSuccess = (newUser: User) => {
 
 <style scoped>
 .home {
-  max-width: 1400px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
 }
 
-.loading {
-  text-align: center;
-  padding: 2rem;
-  color: #666;
-}
-
-.authenticated-content {
-  margin-top: 2rem;
+@media (min-width: 768px) {
+  .home {
+    padding: 40px;
+  }
 }
 </style>
