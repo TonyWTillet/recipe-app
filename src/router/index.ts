@@ -1,7 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
-import { auth } from '../firebase/config'
-import { onAuthStateChanged } from 'firebase/auth'
+import AccountView from '../views/AccountView.vue'
+import RecipesView from '../views/RecipesView.vue'
+import { useAuth } from '@/composables/useAuth'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -9,7 +10,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView,
+      component: HomeView
     },
     {
       path: '/login',
@@ -22,31 +23,25 @@ const router = createRouter({
     {
       path: '/account',
       name: 'account',
-      component: () => import('../views/AccountView.vue'),
-      meta: { requiresAuth: true },
+      component: AccountView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/recipes',
+      name: 'recipes',
+      component: RecipesView,
+      meta: { requiresAuth: true }
     },
   ],
 })
 
 // Navigation guard pour protéger les routes qui nécessitent une authentification
 router.beforeEach((to, from, next) => {
-  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+  const { user } = useAuth()
 
-  if (requiresAuth) {
-    // Vérifier si l'utilisateur est connecté
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      unsubscribe() // Arrêter d'écouter les changements d'état d'authentification
-
-      if (user) {
-        // L'utilisateur est connecté, permettre l'accès à la route
-        next()
-      } else {
-        // L'utilisateur n'est pas connecté, rediriger vers la page de connexion
-        next({ name: 'login' })
-      }
-    })
+  if (to.meta.requiresAuth && !user.value) {
+    next({ name: 'home' })
   } else {
-    // La route ne nécessite pas d'authentification, continuer normalement
     next()
   }
 })

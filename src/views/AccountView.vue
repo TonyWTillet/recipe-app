@@ -1,55 +1,76 @@
 <template>
-  <div class="account-page">
-    <div class="account-container">
-      <h1>Mon Compte</h1>
+  <div v-if="user" class="account-page">
+    <div class="account-container bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-8">
+      <h1 class="text-2xl font-bold text-white text-center mb-8">Mon Compte</h1>
 
-      <div class="profile-section">
-        <div class="profile-header">
-          <div class="profile-avatar">
-            <img v-if="user.photoURL" :src="user.photoURL" alt="Photo de profil" />
-            <div v-else class="avatar-placeholder">
+      <div class="profile-section mb-8">
+        <div class="profile-header flex items-center gap-6">
+          <div class="profile-avatar w-24 h-24 rounded-full overflow-hidden bg-white/10 flex items-center justify-center">
+            <img v-if="user.photoURL" :src="user.photoURL" alt="Photo de profil" class="w-full h-full object-cover" />
+            <div v-else class="w-full h-full flex items-center justify-center bg-white/10 text-white text-3xl font-bold">
               {{ userInitials }}
             </div>
           </div>
           <div class="profile-info">
-            <h2>{{ user.displayName || 'Utilisateur' }}</h2>
-            <p>{{ user.email }}</p>
+            <h2 class="text-xl font-medium text-white m-0">{{ user.displayName || 'Utilisateur' }}</h2>
+            <p class="text-gray-400 mt-1">{{ user.email }}</p>
           </div>
         </div>
       </div>
 
-      <div class="account-sections">
+      <div class="space-y-8">
         <div class="section">
-          <h3>Informations personnelles</h3>
-          <form @submit.prevent="updateProfile" class="profile-form">
+          <h3 class="text-lg font-medium text-white mb-4">Informations personnelles</h3>
+          <div class="space-y-4">
             <div class="form-group">
-              <label for="displayName">Nom d'affichage</label>
-              <input type="text" id="displayName" v-model="displayName" placeholder="Votre nom" />
+              <label for="displayName" class="block text-sm font-medium text-gray-300 mb-2">Nom d'affichage</label>
+              <input
+                type="text"
+                id="displayName"
+                v-model="displayName"
+                placeholder="Votre nom"
+                class="mt-1 block w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+              />
             </div>
-            <div class="form-group">
-              <label for="photoURL">URL de la photo de profil</label>
-              <input type="url" id="photoURL" v-model="photoURL" placeholder="URL de votre photo" />
-            </div>
-            <button type="submit" :disabled="updating">
-              {{ updating ? 'Mise à jour...' : 'Mettre à jour le profil' }}
-            </button>
-            <p class="success" v-if="updateSuccess">Profil mis à jour avec succès !</p>
-            <p class="error" v-if="updateError">{{ updateError }}</p>
-          </form>
-        </div>
-
-        <div class="section">
-          <h3>Sécurité</h3>
-          <div class="security-options">
-            <button @click="changePassword" class="secondary-btn">Changer le mot de passe</button>
-            <button @click="deleteAccount" class="danger-btn">Supprimer le compte</button>
           </div>
         </div>
 
         <div class="section">
-          <h3>Déconnexion</h3>
-          <p>Vous pouvez vous déconnecter de votre compte à tout moment.</p>
-          <button @click="logout" class="logout-btn">Se déconnecter</button>
+          <h3 class="text-lg font-medium text-white mb-4">Allergies alimentaires</h3>
+          <div class="space-y-4">
+            <div class="form-group">
+              <label for="allergies" class="block text-sm font-medium text-gray-300 mb-2">Allergies connues</label>
+              <input
+                type="text"
+                id="allergies"
+                v-model="allergies"
+                placeholder="Ex: gluten, arachides..."
+                class="mt-1 block w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-4 pt-6">
+          <button
+            @click="updateProfile"
+            :disabled="updating"
+            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-gradient-to-r from-violet-500 to-blue-500 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          >
+            {{ updating ? 'Mise à jour...' : 'Enregistrer les modifications' }}
+          </button>
+
+          <button
+            @click="logout"
+            class="w-full flex justify-center py-3 px-4 border border-white/10 rounded-xl shadow-sm text-sm font-medium text-white bg-white/5 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 cursor-pointer"
+          >
+            Se déconnecter
+          </button>
+        </div>
+
+        <div class="space-y-2">
+          <p v-if="updateSuccess" class="text-green-400 text-sm text-center">Profil mis à jour avec succès !</p>
+          <p v-if="updateError" class="text-red-400 text-sm text-center">{{ updateError }}</p>
         </div>
       </div>
     </div>
@@ -59,87 +80,96 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { auth } from '../firebase/config'
 import {
-  updateProfile,
-  deleteUser,
-  EmailAuthProvider,
-  reauthenticateWithCredential,
-  type User,
+  updateProfile as updateFirebaseProfile,
 } from 'firebase/auth'
 import { useAuth } from '../composables/useAuth'
+import { userService } from '../services/userService'
+
+// Définir une interface locale pour les données utilisateur
+interface LocalUserData {
+  displayName: string | null
+  email: string | null
+  photoURL: string | null
+  allergies: string
+  createdAt?: Date
+  updatedAt?: Date
+}
 
 const router = useRouter()
 const { user, logout } = useAuth()
 
 const displayName = ref('')
-const photoURL = ref('')
+const allergies = ref('')
 const updating = ref(false)
 const updateSuccess = ref(false)
 const updateError = ref('')
+const userData = ref<LocalUserData | null>(null)
 
-// Calculer les initiales de l'utilisateur pour l'avatar par défaut
 const userInitials = computed(() => {
   if (!user.value) return ''
   const name = user.value.displayName || user.value.email || ''
   return name.charAt(0).toUpperCase()
 })
 
-// Initialiser les valeurs du formulaire avec les données de l'utilisateur
-onMounted(() => {
-  if (user.value) {
+onMounted(async () => {
+  if (!user.value) {
+    router.push('/login')
+    return
+  }
+
+  // Charger les données utilisateur depuis Firestore
+  userData.value = await userService.getUserData(user.value.uid) as LocalUserData | null
+  console.log('User data from Firestore:', userData.value)
+
+  if (userData.value) {
+    displayName.value = userData.value.displayName || ''
+    allergies.value = userData.value.allergies || ''
+  } else {
+    // Créer un nouveau document utilisateur si n'existe pas
+    await userService.createUserData(user.value)
     displayName.value = user.value.displayName || ''
-    photoURL.value = user.value.photoURL || ''
   }
 })
 
-// Mettre à jour le profil de l'utilisateur
 const updateUserProfile = async () => {
   if (!user.value) return
-
   updating.value = true
   updateSuccess.value = false
   updateError.value = ''
 
   try {
-    await updateProfile(user.value, {
+    // Mettre à jour le profil Firebase Auth
+    await updateFirebaseProfile(user.value, {
       displayName: displayName.value,
-      photoURL: photoURL.value,
+      photoURL: userData.value?.photoURL || null
     })
+
+    // Mettre à jour les données dans Firestore
+    await userService.updateUserData(user.value.uid, {
+      displayName: displayName.value,
+      allergies: allergies.value,
+      photoURL: userData.value?.photoURL || null
+    })
+
+    // Mettre à jour userData local
+    if (userData.value) {
+      userData.value.displayName = displayName.value
+      userData.value.allergies = allergies.value
+    }
+
     updateSuccess.value = true
-  } catch (error: any) {
-    updateError.value = error.message
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      updateError.value = error.message
+    } else {
+      updateError.value = 'Une erreur est survenue'
+    }
   } finally {
     updating.value = false
   }
 }
 
-// Changer le mot de passe
-const changePassword = () => {
-  // Rediriger vers une page de changement de mot de passe
-  // ou afficher un modal
-  alert('Fonctionnalité à implémenter')
-}
-
-// Supprimer le compte
-const deleteAccount = async () => {
-  if (!user.value) return
-
-  if (confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')) {
-    try {
-      // Pour supprimer un compte, l'utilisateur doit être réauthentifié
-      // Cette partie nécessiterait une implémentation plus complète
-      // avec une demande de mot de passe
-      await deleteUser(user.value)
-      router.push('/')
-    } catch (error: any) {
-      console.error('Erreur lors de la suppression du compte:', error)
-      alert('Impossible de supprimer le compte. Veuillez réessayer plus tard.')
-    }
-  }
-}
-
-// Mettre à jour le profil
 const updateProfile = async () => {
   await updateUserProfile()
 }
@@ -150,172 +180,26 @@ const updateProfile = async () => {
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem;
+  height: calc(100vh - 5rem);
+  overflow-y: auto;
 }
 
-.account-container {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
+/* Style de défilement personnalisé */
+.account-page::-webkit-scrollbar {
+  width: 5px;
 }
 
-h1 {
-  color: #2c3e50;
-  margin-bottom: 2rem;
-  text-align: center;
+.account-page::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
 }
 
-.profile-section {
-  margin-bottom: 2rem;
+.account-page::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
 }
 
-.profile-header {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.profile-avatar {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  overflow: hidden;
-  background-color: #f1f1f1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.profile-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.avatar-placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #4caf50;
-  color: white;
-  font-size: 2.5rem;
-  font-weight: bold;
-}
-
-.profile-info h2 {
-  margin: 0;
-  color: #2c3e50;
-}
-
-.profile-info p {
-  margin: 0.5rem 0 0;
-  color: #666;
-}
-
-.account-sections {
-  display: grid;
-  gap: 2rem;
-}
-
-.section {
-  border: 1px solid #eee;
-  border-radius: 8px;
-  padding: 1.5rem;
-}
-
-.section h3 {
-  margin-top: 0;
-  color: #2c3e50;
-  margin-bottom: 1rem;
-}
-
-.profile-form {
-  display: grid;
-  gap: 1rem;
-}
-
-.form-group {
-  display: grid;
-  gap: 0.5rem;
-}
-
-label {
-  font-weight: 500;
-  color: #666;
-}
-
-input {
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-}
-
-button {
-  padding: 0.75rem 1rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-button.primary-btn {
-  background-color: #4caf50;
-  color: white;
-}
-
-button.primary-btn:hover {
-  background-color: #45a049;
-}
-
-button.secondary-btn {
-  background-color: #f1f1f1;
-  color: #333;
-}
-
-button.secondary-btn:hover {
-  background-color: #e0e0e0;
-}
-
-button.danger-btn {
-  background-color: #ff4444;
-  color: white;
-}
-
-button.danger-btn:hover {
-  background-color: #cc0000;
-}
-
-button.logout-btn {
-  background-color: #f1f1f1;
-  color: #333;
-}
-
-button.logout-btn:hover {
-  background-color: #e0e0e0;
-}
-
-.security-options {
-  display: grid;
-  gap: 1rem;
-}
-
-.success {
-  color: #4caf50;
-  margin-top: 1rem;
-}
-
-.error {
-  color: #ff4444;
-  margin-top: 1rem;
+.account-page::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 </style>

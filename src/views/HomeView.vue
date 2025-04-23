@@ -8,47 +8,40 @@
     <template v-else>
       <!-- Contenu authentifié -->
       <div v-if="user" class="space-y-8">
-
         <div class="bg-white/5 rounded-2xl p-8 border border-white/10">
           <RecipeChatbot />
         </div>
       </div>
 
-      <!-- Formulaires d'authentification -->
-      <template v-else>
-        <div class="max-w-md mx-auto">
-          <div class="bg-white/5 rounded-2xl p-8 border border-white/10">
-            <AuthForm
-              v-if="!showResetPassword"
-              @auth-success="handleAuthSuccess"
-              @reset-password="showResetPassword = true"
-              class="space-y-6"
-            />
-            <ResetPassword
-              v-else
-              @back="showResetPassword = false"
-              class="space-y-6"
-            />
-          </div>
-        </div>
-      </template>
+      <!-- Redirection si non authentifié -->
+      <div v-else class="flex items-center justify-center min-h-[60vh]">
+        <p class="text-gray-400">Veuillez vous connecter pour accéder à cette page.</p>
+      </div>
     </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import RecipeChatbot from '../components/RecipeChatbot.vue'
-import AuthForm from '../components/AuthForm.vue'
-import ResetPassword from '../components/ResetPassword.vue'
 import { useAuth } from '../composables/useAuth'
 import type { User } from 'firebase/auth'
 
+const router = useRouter()
 const { user, loading, logout } = useAuth()
-const showResetPassword = ref(false)
 
-const handleAuthSuccess = (newUser: User) => {
-  console.log('Utilisateur connecté:', newUser.email)
+// Rediriger vers la page de connexion si non authentifié
+onMounted(() => {
+  if (!user.value && !loading.value) {
+    router.push('/login')
+  }
+})
+
+// Gérer la déconnexion
+const handleLogout = async () => {
+  await logout()
+  router.push('/login')
 }
 </script>
 

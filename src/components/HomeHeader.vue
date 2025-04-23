@@ -14,17 +14,17 @@
           <div class="flex items-center gap-5">
             <router-link
               to="/"
-              class="text-gray-300 hover:text-white text-sm font-medium border-b-2 border-transparent hover:border-white/50 transition-colors duration-200 py-2"
+              class="nav-link text-gray-300 hover:text-white text-sm font-medium border-b-2 border-transparent hover:border-white/50 transition-colors duration-200 py-2"
               active-class="border-white text-white"
             >
               Accueil
             </router-link>
             <router-link
               to="/recipes"
-              class="text-gray-300 hover:text-white text-sm font-medium border-b-2 border-transparent hover:border-white/50 transition-colors duration-200 py-2"
+              class="nav-link text-gray-300 hover:text-white text-sm font-medium border-b-2 border-transparent hover:border-white/50 transition-colors duration-200 py-2"
               active-class="border-white text-white"
             >
-              Recettes
+              Mes recettes
             </router-link>
           </div>
         </div>
@@ -34,19 +34,21 @@
           <div v-if="user" class="flex items-center bg-white/5 rounded-full pl-3 pr-1 py-1.5">
             <div class="flex items-center gap-5">
               <!-- Image de profil ou initiales -->
-              <div v-if="user.photoURL" class="h-8 w-8 rounded-full overflow-hidden ring-1 ring-white/20">
-                <img :src="user.photoURL" alt="Photo de profil" class="h-full w-full object-cover" />
-              </div>
-              <div v-else class="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center ring-1 ring-white/20">
-                <span class="text-white font-medium text-sm">
-                  {{ getUserInitials(user) }}
-                </span>
-              </div>
-              <span class="text-sm font-medium text-gray-300">{{ getUserDisplayName(user) }}</span>
+              <RouterLink to="/account" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                <div v-if="user.photoURL" class="h-8 w-8 rounded-full overflow-hidden ring-1 ring-white/20">
+                  <img :src="user.photoURL" alt="Photo de profil" class="h-full w-full object-cover" />
+                </div>
+                <div v-else class="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center ring-1 ring-white/20">
+                  <span class="text-white font-medium text-sm">
+                    {{ getUserInitials(user) }}
+                  </span>
+                </div>
+                <span class="text-sm font-medium text-gray-300">{{ getUserDisplayName(user) }}</span>
+              </RouterLink>
 
               <!-- Bouton déconnexion intégré -->
               <button
-                @click="$emit('logout')"
+                @click="handleLogout"
                 class="bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white px-3 py-1.5 rounded-full text-sm font-medium transition-colors duration-200"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -58,9 +60,12 @@
           <div v-else>
             <router-link
               to="/login"
-              class="bg-white hover:bg-white/90 text-black px-4 py-2 rounded-full text-sm font-medium transition-all duration-200"
+              class="bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white px-3 py-1.5 rounded-full text-sm font-medium transition-colors duration-200 flex items-center gap-2"
             >
-              Connexion
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+              </svg>
+              <span>Connexion</span>
             </router-link>
           </div>
         </div>
@@ -97,17 +102,17 @@
       <div class="px-2 pt-2 pb-3 space-y-1">
         <router-link
           to="/"
-          class="text-gray-300 hover:bg-white/5 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
+          class="nav-link text-gray-300 hover:bg-white/5 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
           active-class="bg-white/10 text-white"
         >
           Accueil
         </router-link>
         <router-link
           to="/recipes"
-          class="text-gray-300 hover:bg-white/5 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
+          class="nav-link text-gray-300 hover:bg-white/5 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
           active-class="bg-white/10 text-white"
         >
-          Recettes
+        Mes recettes
         </router-link>
       </div>
       <div class="pt-4 pb-3 border-t border-white/10">
@@ -125,7 +130,7 @@
             <div class="ml-3">
               <div class="text-base font-medium text-white">{{ getUserDisplayName(user) }}</div>
               <button
-                @click="$emit('logout')"
+                @click="handleLogout"
                 class="mt-2 w-full bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2"
               >
                 <span>Déconnexion</span>
@@ -139,9 +144,12 @@
         <div v-else class="px-4 py-2">
           <router-link
             to="/login"
-            class="block w-full bg-white hover:bg-white/90 text-black px-4 py-2 rounded-full text-base font-medium text-center"
+            class="bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white px-3 py-1.5 rounded-full text-sm font-medium transition-colors duration-200 flex items-center gap-2"
           >
-            Connexion
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+            </svg>
+            <span>Connexion</span>
           </router-link>
         </div>
       </div>
@@ -152,19 +160,26 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import type { User } from 'firebase/auth';
+import { RouterLink } from 'vue-router';
+import { useRouter } from 'vue-router';
+import { useAuth } from '../composables/useAuth';
+
+const router = useRouter();
+const { logout } = useAuth();
 
 // Props
 defineProps<{
   user: User | null
 }>();
 
-// Événements
-defineEmits<{
-  (e: 'logout'): void
-}>();
-
 // État du menu mobile
 const mobileMenuOpen = ref(false);
+
+// Fonction pour gérer la déconnexion
+const handleLogout = async () => {
+  await logout();
+  router.push('/login');
+};
 
 // Fonction pour obtenir les initiales de l'utilisateur
 const getUserInitials = (user: User): string => {
